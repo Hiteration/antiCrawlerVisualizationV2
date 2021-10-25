@@ -1,0 +1,3 @@
+*.pyc
+/LogVisualization/tmp/
+/records/
