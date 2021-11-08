@@ -122,7 +122,7 @@ def metaInfoCreate(fileName):
             if code in BANNED:
                 try:
                     if re.search(pattren_rate_limit_exceeded, log['operationResult']['result']):
-                        print("there is ban!!!!")
+                        # print("there is ban!!!!")
                         IS_BANNED = 1
                         log['operationResult'] = '3'
                         logs_write.append(log)
