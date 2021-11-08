@@ -40,20 +40,20 @@ def fre_params(request):
         paramsinfo = json.load(f)
 
     '''
-    stage=0,初始化
-    stage=1,无封禁无怀疑
-    stage=3,无封禁有怀疑
-    stage=2,有封禁
+    stage=0, 初始化
+    stage=1, 无封禁 无怀疑
+    stage=2, 无封禁 有怀疑
+    stage=3, 有封禁
     '''
     # 日志中无封禁，无怀疑
-    if(paramsinfo['frequency']['stage'] == 1):
+    if paramsinfo['frequency']['stage'] == 1:
         newParams["stage"] = 1
         return HttpResponse(json.dumps(newParams), content_type="application/json")
 
     # 日志中无封禁，有怀疑
-    if(paramsinfo['frequency']['stage'] == 3):
+    if paramsinfo['frequency']['stage'] == 2:
         print('无封禁，有怀疑')
-        newParams["stage"] = 3
+        newParams["stage"] = 2
         for windowType in [0, 1]:
             if(windowType == 0): # 时间窗口
                 for windowsSize in TIME_WIN_SIZE:
@@ -72,11 +72,11 @@ def fre_params(request):
 
                     dataset = pd.DataFrame(dataset_time, columns=['time', 'frequency', 'status'])
 
-                    line_location = dataset[dataset['status'] == 1]['frequency'].min()
+                    line_location = dataset[dataset['status'] == 2]['frequency'].min()
                     print('linelocation:', line_location)
                     dataset = dataset.dropna(subset=['frequency'])
                     df_up = dataset[dataset['frequency'] > line_location - 1]
-                    timeW[windowsSize] = [(df_up['status'].groupby(df_up['status']).count().loc[1]) / len(df_up) , line_location]
+                    timeW[windowsSize] = [(df_up['status'].groupby(df_up['status']).count().loc[2]) / len(df_up) , line_location]
 
             else: # 次数窗口
                 for windowSize in NUMBER_WIN_SIZE:
@@ -95,12 +95,12 @@ def fre_params(request):
                             dataset_number.append(threes)
                     dataset = pd.DataFrame(dataset_number, columns=['time', 'frequency', 'status'])
 
-                    line_location = dataset[dataset['status'] == 1]['frequency'].max()
+                    line_location = dataset[dataset['status'] == 2]['frequency'].max()
                     print('linelocation:', line_location)
 
                     dataset = dataset.dropna(subset=['frequency'])
                     df_down = dataset[dataset['frequency'] < line_location + 1]
-                    numberW[windowSize] = [df_down['status'].groupby(df_down['status']).count().loc[1] / len(df_down), line_location]
+                    numberW[windowSize] = [df_down['status'].groupby(df_down['status']).count().loc[2] / len(df_down), line_location]
 
         print('timeW: ', timeW)
         print('numberW: ', numberW)
@@ -125,8 +125,8 @@ def fre_params(request):
         return HttpResponse(json.dumps(newParams), content_type="application/json")
 
     # 日志中有封禁状态
-    if(paramsinfo['frequency']['stage'] == 2):
-        newParams["stage"] = 2
+    if paramsinfo['frequency']['stage'] == 3:
+        newParams["stage"] = 3
         for windowType in [0, 1]: # 遍历windowType
             if(windowType == 0): # 时间窗口
                 # 遍历windowSize
@@ -151,14 +151,14 @@ def fre_params(request):
                             dataset_time.append(subitem)
 
                     dataset = pd.DataFrame(dataset_time, columns=['time', 'frequency', 'status'])
-                    # 选取status为2时的frequency里的最小的值，作为line_location
-                    line_location = dataset[dataset['status'] == 2]['frequency'].min()
+                    # 选取status为3时的frequency里的最小的值，作为line_location
+                    line_location = dataset[dataset['status'] == 3]['frequency'].min()
                     # 去掉frequency字段有NaN的行
                     dataset = dataset.dropna(subset=['frequency'])
                     # 只保留frequency大于等于line_location的值
                     df_up = dataset[dataset['frequency'] > line_location - 1]
-                    # 分别计算出每个status对应的数目，选择其中为2的数目，再除以总数，作为封禁的概率
-                    timeW[windowSize] = [(df_up['status'].groupby(df_up['status']).count().loc[2]) / len(df_up) , line_location]
+                    # 分别计算出每个status对应的数目，选择其中为3的数目，再除以总数，作为封禁的概率
+                    timeW[windowSize] = [(df_up['status'].groupby(df_up['status']).count().loc[3]) / len(df_up) , line_location]
 
             else: # 次数窗口
                 for windowSize in NUMBER_WIN_SIZE:
@@ -176,19 +176,18 @@ def fre_params(request):
                             dataset_number.append(threes)
 
                     dataset = pd.DataFrame(dataset_number, columns=['time', 'frequency', 'status'])
-                    line_location = dataset[dataset['status'] == 2]['frequency'].max()
+                    line_location = dataset[dataset['status'] == 3]['frequency'].max()
                     print('linelocation:', line_location)
                     dataset = dataset.dropna(subset=['frequency'])
                     df_down = dataset[dataset['frequency'] < line_location + 1]
-                    numberW[windowSize] = [df_down['status'].groupby(df_down['status']).count().loc[2] / len(df_down), line_location]
+                    numberW[windowSize] = [df_down['status'].groupby(df_down['status']).count().loc[3] / len(df_down), line_location]
 
-        #####待看#####
         print('timeW: ', timeW)
         print('numberW: ', numberW)
         # newParams = {}# {"时间窗口": [], "次数窗口":[]}
         temp = 0
         for idx in timeW.keys():
-            if(timeW[idx][0] > temp): 
+            if timeW[idx][0] > temp:
                 temp = timeW[idx][0]
                 # newParams['newWindowType'] = 0
                 # 窗口大小， 封禁百分比， 推测的阈值
@@ -197,7 +196,7 @@ def fre_params(request):
                 newParams["newTimeBan"] = (timeW[idx][1])
         temp = 0
         for idx in numberW.keys():
-            if(numberW[idx][0] > temp): 
+            if numberW[idx][0] > temp:
                 temp = numberW[idx][0]
                 newParams["newNumberWindow"] = int(idx)
                 newParams['newNumberMix'] = (numberW[idx][0])
@@ -206,6 +205,7 @@ def fre_params(request):
         print(newParams)
         return HttpResponse(json.dumps(newParams), content_type="application/json")
 
+#### 安全怀疑封禁参数待修改!!! ####
 # 自动获取间隔参数
 def interval_params(request):
     print('正在获取interval参数...')

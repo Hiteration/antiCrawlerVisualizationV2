@@ -295,5 +295,10 @@ export default {
     },
   },
 }
-
 </script>
+
+<style scoped>
+.el-button {
+  background-color: #3679fa
+}
+</style>

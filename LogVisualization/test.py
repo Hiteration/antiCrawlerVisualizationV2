@@ -25,3 +25,4 @@ print(dataset)
 # print(dataset['status'].groupby(dataset['status']).count())
 # print(dataset[dataset['status'] == 2]['frequency'].min())
 print(dataset.dropna(subset=['frequency']))
+

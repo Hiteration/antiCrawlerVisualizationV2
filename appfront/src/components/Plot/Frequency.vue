@@ -2,7 +2,7 @@
   <div>
     <el-row :span="24" align='middle'>
       <el-col :span="5">
-        <el-form ref="form" label-width="100px" size="mini">
+          <el-form ref="form" label-width="100px" size="mini">
           <el-form-item label="画图窗口:">
             <el-select v-model="windowType" @change="windowselected" placeholder="请选择画图窗口"> <!--windowselected 根据 时间或次数窗口 改变窗口大小的单位-->
               <el-option label="时间窗口" value="时间窗口"></el-option>
@@ -12,7 +12,7 @@
 
           <el-form-item label="窗口大小:">
             <el-input v-model="windowSize" style="margin-right: 100px;">
-              <i slot="suffix" style="font-style:normal;margin-right: 10px;">{{text}}</i> <!--给input内部加单位的方法-->
+              <i slot="suffix" style="font-style:normal; margin-right: 10px; font-weight: normal;">{{text}}</i> <!--给input内部加单位的方法-->
             </el-input>
           </el-form-item>
 
@@ -30,8 +30,8 @@
           </el-form-item>
 
           <el-form-item label="观察目标:">
-            <el-select v-model="selectedTargets" multiple collapse-tags style="margin-left: 0px;" placeholder="请选择"><!--可多选,并且仅显示第一个-->
-              <el-option v-for="item of targets" :key="item" :label="item" :value="item">
+            <el-select v-model="selectedTargets" multiple collapse-tags style="margin-left: 0px; font-weight: normal;" placeholder="请选择" ><!--可多选,并且仅显示第一个-->
+              <el-option v-for="item of targets" :key="item" :label="item" :value="item" style="font-weight: normal;">
               </el-option>
             </el-select>
           </el-form-item>
@@ -53,55 +53,74 @@
           <el-form-item>
             <el-button type="primary" @click="getFrequency">开始画图</el-button>
           </el-form-item>
+        
+          <el-form-item label="参数推荐:">
+            <div v-if="newParams.stage == undefined" >
+              <p style="color: #606266; font-weight: normal;">-</p>
+            </div>
+            <div v-if="newParams.stage == 0" >
+              <p style="color: #606266; font-weight: normal;">参数计算中...</p>
+            </div>
+            <div v-if="newParams.stage > 1"> <!--stage不为1时 给出建议-->
+              <div style="display:flex; justify-content:space-between; padding:1px; align-items:center;">
+                <p style="color: #606266; font-size: 14px; text-align: left; font-weight: normal;">
+                  建议的时间窗口: {{(newParams.newTimeWindow / 60).toFixed(0)}}分钟</p> <!--秒化分，保留两位小数-->
+                <el-button @click="applyTime" style="float: right; padding: 4px 4px; color: #fff; font-size: 8px;" type="text">应用</el-button>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding:1px; align-items:center;">
+                <p style="color: #606266; font-size: 14px; text-align: left; font-weight: normal;">
+                  建议的次数窗口: {{newParams.newNumberWindow}}次</p>
+                <el-button @click="applyNumber" style="float: right; padding: 4px 4px; color: #fff; font-size: 8px;" type="text">应用</el-button>
+              </div>
+              <p style="color: #606266; font-size: 14px; text-align: left; font-weight: normal;">推荐使用: {{newType}}</p>
+            </div>
+            <div v-if="newParams.stage == 1"> <!--stage为1时 打印message-->
+              {{ message }}
+            </div>
+          </el-form-item>
+
+          <el-form-item label="封禁原因推测:">
+            <div v-if="newParams.stage == undefined" >
+              <p style="color: #606266; font-weight: normal;">-</p>
+            </div>
+            <div v-if="newParams.stage == 0" >
+              <p style="color: #606266; font-weight: normal;">原因推测中...</p>
+            </div>
+
+            <div v-if="newParams.stage == 2">
+              <div v-if="newType == '时间窗口'">
+                <p style="color: #606266; font-size: 14px; text-align: left; font-weight: normal;">
+                  推测产生验证码的原因: {{(newParams.newTimeWindow / 60).toFixed(0)}}分钟内, 访问次数达到了{{newParams.newTimeBan}}次;
+                  产生验证码的概率为{{(newParams.newNumberMix*100).toFixed(1)}}%。
+                </p>
+              </div>
+              <div v-if="newType == '次数窗口'">
+                <p style="color: #606266; font-size: 14px; text-align: left; font-weight: normal;">
+                  推测产生验证码的原因: {{(newParams.newNumberWindow)}}次访问的耗时小于{{(newParams.newNumberBan / 3600).toFixed(2)}}小时;
+                  产生验证码的概率为{{(newParams.newNumberMix*100).toFixed(1)}}%。
+                </p>
+              </div>
+            </div>
+
+            <div v-if="newParams.stage == 3">
+              <div v-if="newType == '时间窗口'">
+                <p style="color: #606266; font-size: 14px; text-align: left; font-weight: normal;">
+                  {{(newParams.newTimeWindow / 60).toFixed(0)}}分钟内, 访问次数达到了{{newParams.newTimeBan}}次;
+                  封禁的概率为{{(newParams.newNumberMix*100).toFixed(1)}}%。
+                </p>
+              </div>
+              <div v-if="newType == '次数窗口'">
+                <p style="color: #606266; font-size: 14px; text-align: left; font-weight: normal;">
+                  推测产生封禁的原因: {{(newParams.newNumberWindow)}}次访问的耗时小于{{(newParams.newNumberBan / 3600).toFixed(2)}}小时;
+                  封禁概率为{{(newParams.newNumberMix*100).toFixed(1)}}%。
+                </p>
+              </div>
+            </div>
+
+          </el-form-item>
+        
         </el-form>
 
-        <el-card class="box-card" :span="5">
-          <div v-if="newParams.stage > 1"> <!--stage不为1时 给出建议-->
-            <p>
-              建议的时间窗口：{{(newParams.newTimeWindow / 60).toFixed(2)}}分钟 <!--秒化分，保留两位小数-->
-              <el-button @click="applyTime" style="float: right; padding: 3px 0" type="text">应用</el-button>
-            </p>
-            <p>
-              建议的次数窗口: {{newParams.newNumberWindow}}次
-              <el-button @click="applyNumber" style="float: right; padding: 3px 0" type="text">应用</el-button>
-            </p>
-            <p>推荐使用{{newType}}</p>
-          </div>
-          <div v-if="newParams.stage == 1"> <!--stage为1时 打印message-->
-            {{ message }}
-          </div>
-        </el-card>
-
-        <el-card class="box-card" :span="5">
-          <div v-if="newParams.stage == 3">
-            <div v-if="newType == '时间窗口'">
-              <p>
-                推测产生验证码的原因为：{{(newParams.newTimeWindow / 60).toFixed(2)}}分钟内,访问次数达到了{{newParams.newTimeBan}}次;
-                产生验证码的概率为{{(newParams.newNumberMix*100).toFixed(2)}}%。
-              </p>
-            </div>
-            <div v-if="newType == '次数窗口'">
-              <p>
-                推测产生验证码的原因为：{{(newParams.newNumberWindow)}}次访问的耗时小于{{(newParams.newNumberBan / 3600).toFixed(2)}}小时;
-                产生验证码的概率为{{(newParams.newNumberMix*100).toFixed(2)}}%。
-              </p>
-            </div>
-          </div>
-          <div v-if="newParams.stage == 2">
-            <div v-if="newType == '时间窗口'">
-              <p>
-                推测产生封禁的原因为：{{(newParams.newTimeWindow / 60).toFixed(2)}}分钟内,访问次数达到了{{newParams.newTimeBan}}次;
-                封禁的概率为{{(newParams.newNumberMix*100).toFixed(2)}}%。
-              </p>
-            </div>
-            <div v-if="newType == '次数窗口'">
-              <p>
-                推测产生封禁的原因为：{{(newParams.newNumberWindow)}}次访问的耗时小于{{(newParams.newNumberBan / 3600).toFixed(2)}}小时;
-                封禁概率为{{(newParams.newNumberMix*100).toFixed(2)}}%。
-              </p>
-            </div>
-          </div>
-        </el-card>
       </el-col>
       <!-- 下面是画图的地方 -->
       <el-col :span="19">
@@ -255,6 +274,8 @@ export default {
      */  
     getFrequency: function () {
       this.drawLine();
+      if(this.endtime != '')
+      this.newParams = {stage: 0}
     },
     drawLine: function () {
       // 1.准备请求参数
@@ -351,11 +372,11 @@ export default {
         this.newParams = data.data
         console.log(this.newParams)
         if (this.newParams.stage == 1) { //没有怀疑/封禁 不需要推荐
-          this.message = '目标网站即未产生封禁，又未出现验证码，建议加大访问频率。'
+          this.message = '目标网站既未产生封禁, 又未出现验证码, 建议加大访问频率。'
           console.log(this.message)
         }
-        if (this.newParams.stage == 3) {
-          this.message = '目标网站未产生封禁，但出现了验证码'
+        if (this.newParams.stage == 2) {
+          this.message = '目标网站未产生封禁, 但出现了验证码'
           if (this.newParams.newNumberMix > this.newParams.newTimeMix) { //Mix代表概率，大者决定最终推荐(时间还是次数)
             this.newType = "次数窗口"
             this.newSize = newNumberWindow
@@ -365,7 +386,7 @@ export default {
             this.newSize = this.newParams.newTimeWindow
           }
         }
-        if (this.newParams.stage == 2) {
+        if (this.newParams.stage == 3) {
           this.message = '目标网站产生了封禁'
           if (this.newParams.newNumberMix > this.newParams.newTimeMix) { //Mix代表概率，大者决定最终推荐(时间还是次数)
             this.newType = "次数窗口"
@@ -394,5 +415,16 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+.el-select {
+  width: 100%;
+}
+.el-button {
+  background-color: #3679fa;
+  font-family: "Microsoft YaHei" !important;
+}
+.el-row {
+  font-family: "Microsoft YaHei" !important;
+  font-weight: bold !important;
+}
 </style>

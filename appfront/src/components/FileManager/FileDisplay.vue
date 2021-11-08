@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="FileDisplay-wrapper">
     <Header :nav_tab="currentNav" @listenToChild="listenToChild"></Header>
-    <el-table :data="tableData" style="width: 100%">
+    <el-table header-cell-style="color: #333740" :data="tableData" style="width: 100%">
       <el-table-column label="文件名" prop="fileName"></el-table-column>
       <el-table-column label="IP个数" prop="ipNum"></el-table-column>
       <el-table-column label="Account个数" prop="accountNum"></el-table-column>
@@ -58,16 +58,23 @@ export default {
 </script>
 
 <style>
-.demo-table-expand {
-  font-size: 0;
+.FileDisplay-wrapper{
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-.demo-table-expand label {
-  width: 90px;
-  color: #99a9bf;
+.el-table{
+  padding: 8px 16px;
+  background-color: #f2f3f8;
+  flex-grow: 1;
+  font-family: "Microsoft YaHei" !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
 }
-.demo-table-expand .el-form-item {
-  margin-right: 0;
-  margin-bottom: 0;
-  width: 50%;
+</style>
+
+<style scoped>
+.el-button{
+  font-family: "Microsoft YaHei" !important;
 }
 </style>

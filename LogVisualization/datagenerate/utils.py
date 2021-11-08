@@ -10,7 +10,7 @@ ip_to_location = {'8.209.221.177': 'Japan', '173.82.200.74':'United States', \
 def lookup(ip):
   if(ip in ip_to_location.keys()):
     # 手动配置代理ip地址
-    return ip + ',' + ip_to_location[ip]
+    return ip + ', ' + ip_to_location[ip]
     URL = 'http://ip-api.com/json/' + ip
     # try:
     r = requests.get(URL, timeout=500)
@@ -20,6 +20,6 @@ def lookup(ip):
     print(ip)
     print('所在国家：' + r_json['country'])
     print('所在地区：' + r_json['regionName'])
-    return(ip + ',' + r_json['country'] + ',' + r_json['regionName'])
+    return(ip + ', ' + r_json['country'] + ', ' + r_json['regionName'])
   else:
     return ip

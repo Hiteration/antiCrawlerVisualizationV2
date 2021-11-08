@@ -9,7 +9,7 @@ def fileUpload(request):
     print(files)
     baseDir = os.path.dirname(os.path.abspath(__name__))
     for file_name in files:
-        with open(os.path.join(baseDir,'tmp',file_name.name),'wb') as f:
+        with open(os.path.join(baseDir, 'tmp', file_name.name), 'wb') as f:
             for chrunk in file_name.chunks():
                 f.write(chrunk)
             f.flush()
@@ -27,7 +27,7 @@ def getMetaInfo(request):
         with open(os.path.join(metaDir, fileName)) as f:
             info = json.load(f)
         res.append(info)
-    return HttpResponse(json.dumps({'code':200,'data':res}), content_type="application/json")
+    return HttpResponse(json.dumps({'code': 200, 'data': res}), content_type="application/json")
 
 # 删除文件
 def fileDelete(request):

@@ -32,8 +32,8 @@ export const getLineOption = (featureType, windowType, lineDataOriginal, scale, 
   for (const item in lineDataOriginal) { //item可能是ip也可能是account
     lineData[item] = []
     for (const subitem of lineDataOriginal[item]) { //subitem是三元组
-      if (subitem[2] == 1 || subitem[2] == 2) { //对怀疑和封禁的点 全部都要
-        lineData[item].push(subitem) 
+      if (subitem[2] == 2 || subitem[2] == 3) { //对怀疑和封禁的点 全部都要
+        lineData[item].push(subitem)
         continue
       }
       var t = new Date(subitem[0])
@@ -48,7 +48,8 @@ export const getLineOption = (featureType, windowType, lineDataOriginal, scale, 
       }
     }
   }
-  console.log(lineData)
+
+  console.log("getLineOption采集后的: ", lineData)
 
   /**
    * 根据featureType设置坐标轴名称
@@ -108,9 +109,9 @@ export const getLineOption = (featureType, windowType, lineDataOriginal, scale, 
       },
       // data: [[1, 2, 0], [2, 3, 0], [4, 6, 1]],
       symbolSize: function (params) {    //params对应data里一个数据点的值, 这里是一个含有三个数字的一维数组
-        if (params[2] == 0) return 0
-        if (params[2] == 1) return 8
-        if (params[2] == 2) return 10
+        if (params[2] == 1) return 0
+        if (params[2] == 2) return 8
+        if (params[2] == 3) return 10
       },
     })
   }

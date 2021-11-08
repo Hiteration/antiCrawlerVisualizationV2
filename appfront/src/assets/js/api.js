@@ -6,10 +6,6 @@ import Network from './network';
 
 //获取元信息
 export const getMetaInfo = () => Network.get('http://127.0.0.1:8000/filemanager/getmetainfo');
-export const getSteplineData = (params) => Network.post('http://127.0.0.1:8000/datagenerate/steplinedata', params)
-  .then(data => {
-    return { "setplineData": data.data }
-  })
 
 //获取频率特征数据
 export const getFrequencyData = (params) => Network.post('http://127.0.0.1:8000/datagenerate/frequencydata', params)
@@ -18,7 +14,7 @@ export const getFrequencyData = (params) => Network.post('http://127.0.0.1:8000/
     var freList = data.data.lineData
     var linedata = {} //生成更好格式的linedata
     for (const item in freList) {
-      if (!(item in linedata)) { linedata[item] = [] }
+      if (!(item in linedata)) {linedata[item] = []}
       for (const subitem of freList[item]) {
         for (const subsubitem of subitem) { //subsubitem是三元组
           linedata[item].push(subsubitem)
@@ -126,6 +122,13 @@ export const getPeriodismData = (params) => Network.post('http://127.0.0.1:8000/
     return { "lineData_number": linedata, "boxdData_number": data.data.boxdData }
   })
 export const getPeriodismParams = (params) => Network.post('http://127.0.0.1:8000/paramsgenerate/periodismparams', params)
+
+
+// export const getSteplineData = (params) => Network.post('http://127.0.0.1:8000/datagenerate/steplinedata', params)
+//   .then(data => {
+//     return { "setplineData": data.data }
+//   })
+
 
 //多变量观察
 export const getFrequencyPoints = (params) => Network.post('http://127.0.0.1:8000/pointsgenerate/frequencypoints', params)

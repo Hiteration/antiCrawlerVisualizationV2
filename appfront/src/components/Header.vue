@@ -1,14 +1,20 @@
 <template>
   <div>
     <el-row>
-    <el-col :span="18"><div style=""><el-menu
+    <el-col :span="5">
+      <div style="display: flex; justify-content: center; overflow: hidden;">
+        <img src="../assets/img/日志可视化系统.png" height="60px">
+      </div>
+      
+    </el-col>
+    <el-col :span="13"><div style=""><el-menu
       height="65px"
       :default-active="activeIndex"
       router
       class="el-menu-demo"
       mode="horizontal"
       @select="handleSelect"
-      background-color="#545c64"
+      background-color="#1e2129"
       text-color="#fff"
       active-text-color="#ffd04b"
     >
@@ -16,7 +22,7 @@
       <el-menu-item index="/plot/variate">特征可视化</el-menu-item>
       <!-- <el-menu-item index="/plot/variates">多变量可视化</el-menu-item> -->
     </el-menu></div></el-col>
-    <el-col :span="6"><div style="height:60px; background-color:#545c64; line-height: 60px">
+    <el-col :span="6"><div style="height:60px; background-color:#1e2129; line-height: 60px">
         <FileUpload v-show="visible" @listenToChild="listenToChild"></FileUpload></div></el-col>
     </el-row>
   </div>
@@ -63,4 +69,22 @@ export default {
 
 
 <style>
+.el-menu.el-menu--horizontal{
+  border-bottom-width: 0px !important;
+}
+.el-menu-item.is-active {
+  color: #3679fa !important;
+  border-bottom-color: #3679fa !important;
+  font-family: "Microsoft YaHei" !important;
+  font-weight: bold !important;
+  font-size: 18px !important;
+  border-bottom-width: 0px !important;
+}
+.el-menu-item {
+  color: #f2f3f8 !important;
+  font-family: "Microsoft YaHei" !important;
+  font-weight: bold !important;
+  font-size: 18px !important;
+  border-bottom-width: 0px !important;
+}
 </style>

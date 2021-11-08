@@ -34,7 +34,7 @@ def freAnalyseLine(fileName, windowType, targetType, selectedTargets, beginTime,
         tmp = {}  # 节点历史访问时间
         timeStr = {}  # 每次访问的格式化时间
         count = {}  # 每次访问的时间窗口内频数
-        state = {}  # 每次访问的状态 0表示通过 1表示怀疑 2表示封禁
+        state = {}  # 每次访问的状态 1表示安全 2表示怀疑 3表示封禁/限流
         flag = {}  # 记录tmp中是否出现过时间跨度大于windowsSize
         ignore = {}  # 记录每个ip是否处于连续访问封禁中
 
@@ -69,27 +69,27 @@ def freAnalyseLine(fileName, windowType, targetType, selectedTargets, beginTime,
 
                 if item['time'] >= beginTime and flag[tmp_key]:
                     code = item['status']['code']  # 得到此次访问的状态码
-                    if code >= 0 and code < 3  and not (code == 2 and ignore[item[targetType]]): # 如果此时是2(封禁)and之前也是封禁 则不添加
+                    if code >= 1 and code < 4  and not (code == 3 and ignore[item[targetType]]):  # 如果此时是3(封禁)and之前也是封禁 则不添加
                         timeStr[tmp_key].append(item['timeStr'])
                         count[tmp_key].append(len(tmp[tmp_key]))
-                        if code == 0:
-                            ignore[tmp_key] = False
-                            state[tmp_key].append(0)
-                        elif code == 1:
+                        if code == 1:
                             ignore[tmp_key] = False
                             state[tmp_key].append(1)
+                        elif code == 2:
+                            ignore[tmp_key] = False
+                            state[tmp_key].append(2)
                         else:
                             ignore[tmp_key] = True
-                            state[tmp_key].append(2)
+                            state[tmp_key].append(3)
 
         for key in selectedTargets:
-            res[key] = {'time':timeStr[key],'count':count[key],'state':state[key]} #res格式{ip1:{'time': [], 'count': [], 'state': []}, ip2:{}, ... }
+            res[key] = {'time': timeStr[key], 'count': count[key], 'state': state[key]}  # res格式{ip1:{'time': [], 'count': [], 'state': []}, ip2:{}, ... }
 
     else:  # 使用的是次数窗口
         tmp = {}  # 节点历史访问时间
         timeStr = {}  # 每次访问的格式化时间
         count = {}  # 每次访问的时间窗口内频数
-        state = {}  # 每次访问的状态 0表示通过 1表示怀疑 2表示封禁
+        state = {}  # 每次访问的状态 1表示安全 2表示怀疑 3表示封禁/限流
         ignore = {}
         for key in selectedTargets:
             tmp[key] = []
@@ -110,18 +110,18 @@ def freAnalyseLine(fileName, windowType, targetType, selectedTargets, beginTime,
                 if len(tmp[item[targetType]]) == windowsSize:
                     if item['time'] >= beginTime:
                         code = item['status']['code']  # 得到此次访问的状态码
-                        if code >= 0 and code < 3  and not (code == 2 and ignore[item[targetType]]):
+                        if code >= 1 and code < 4  and not (code == 3 and ignore[item[targetType]]):
                             timeStr[item[targetType]].append(item['timeStr'])
                             count[item[targetType]].append(tmp[item[targetType]][-1] - tmp[item[targetType]][0])
-                            if code == 0:
-                                ignore[item[targetType]] = False
-                                state[item[targetType]].append(0)
-                            elif code == 1:
+                            if code == 1:
                                 ignore[item[targetType]] = False
                                 state[item[targetType]].append(1)
+                            elif code == 2:
+                                ignore[item[targetType]] = False
+                                state[item[targetType]].append(2)
                             else:
                                 ignore[item[targetType]] = True
-                                state[item[targetType]].append(2)
+                                state[item[targetType]].append(3)
                     del tmp[item[targetType]][0]
         for key in state.keys():
             res[key] = {'time': timeStr[key], 'count': count[key], 'state': state[key]}
@@ -139,7 +139,7 @@ def freAnalyseLine(fileName, windowType, targetType, selectedTargets, beginTime,
                 k = 1
                 if i == len(res[key]['time']):
                     k = 0
-                combine.append(tmp[idx : i+k])
+                combine.append(tmp[idx: i+k])
                 idx = i + 1
         res[key] = combine
 
